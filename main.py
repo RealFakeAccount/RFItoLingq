@@ -113,8 +113,17 @@ def cmd_upload(args):
     else:
         targets = all_episodes
 
+    # Filter by since
+    since_arg = getattr(args, "since", None)
+    if since_arg:
+         targets = [e for e in targets if e.name[:10] >= since_arg]
+
+    # Sort descending (newest first) to prioritize recent uploads.
+    # We want to sync the latest daily news, not backfill old ones by default.
+    targets.sort(key=lambda p: p.name, reverse=True)
+
     # Limit
-    if args.limit:
+    if args.limit and args.limit > 0:
         targets = targets[:args.limit]
         
     print(f"[INFO] Found {len(targets)} episodes to upload")
@@ -159,6 +168,7 @@ def main():
     p_upload = subparsers.add_parser("upload", help="Upload episodes to LingQ")
     p_upload.add_argument("--date", type=str, help="Specific date YYYY-MM-DD")
     p_upload.add_argument("--limit", type=int, default=0, help="Max to upload (0=all)")
+    p_upload.add_argument("--since", type=str, help="Upload episodes since YYYY-MM-DD")
     
     # Sync (Scrape + Upload)
     p_sync = subparsers.add_parser("sync", help="Scrape and Upload")
