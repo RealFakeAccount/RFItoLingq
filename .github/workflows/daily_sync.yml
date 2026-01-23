@@ -2,8 +2,8 @@ name: Daily RFI Sync
 
 on:
   schedule:
-    # Runs at 17:00 UTC every day
-    - cron: '0 17 * * *'
+    # Runs at 17:15 UTC every day to avoid peak hour traffic
+    - cron: '15 17 * * *'
   workflow_dispatch:
 
 jobs:
