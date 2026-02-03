@@ -1,6 +1,9 @@
 name: Debug Schedule
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     # Run every 5 minutes
     - cron: '*/5 * * * *'
