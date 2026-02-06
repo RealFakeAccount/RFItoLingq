@@ -28,7 +28,7 @@ def cmd_scrape(args):
         print(f"Processing {date.date()} -> {url}")
         scraper.process_episode(date, url)
 
-def upload_single_episode(api: LingQAPI, episode_dir: pathlib.Path, existing_lessons: Dict[str, int]) -> bool:
+def upload_single_episode(api: LingQAPI, episode_dir: pathlib.Path, existing_lessons: Dict[str, int], force_private: bool = False) -> bool:
     """Uploads a single episode directory to LingQ."""
     print(f"[PROCESS] {episode_dir.name}")
     transcript_file = episode_dir / "transcript.txt"
@@ -54,7 +54,10 @@ def upload_single_episode(api: LingQAPI, episode_dir: pathlib.Path, existing_les
     if not image_file.exists():
         image_file = None
         
-    status = "shared" if (mp3_file and image_file) else "private"
+    if force_private:
+        status = "private"
+    else:
+        status = "shared" if (mp3_file and image_file) else "private"
     
     # Dynamic tags
     year = date_part[:4]
@@ -133,8 +136,10 @@ def cmd_upload(args):
     print(f"[INFO] Course has {len(existing)} existing lessons")
 
     success_count = 0
+    force_private = getattr(args, "private", False)
+
     for ep in targets:
-        if upload_single_episode(api, ep, existing):
+        if upload_single_episode(api, ep, existing, force_private=force_private):
             success_count += 1
             
     print(f"[DONE] Uploaded {success_count}/{len(targets)}")
@@ -169,6 +174,7 @@ def main():
     p_upload.add_argument("--date", type=str, help="Specific date YYYY-MM-DD")
     p_upload.add_argument("--limit", type=int, default=0, help="Max to upload (0=all)")
     p_upload.add_argument("--since", type=str, help="Upload episodes since YYYY-MM-DD")
+    p_upload.add_argument("--private", action="store_true", help="Force lessons to be private")
     
     # Sync (Scrape + Upload)
     p_sync = subparsers.add_parser("sync", help="Scrape and Upload")
@@ -176,6 +182,7 @@ def main():
     p_sync.add_argument("--pages", type=int, default=3)
     p_sync.add_argument("--since", type=str)
     p_sync.add_argument("--date", type=str, help="Filter upload date")
+    p_sync.add_argument("--private", action="store_true", help="Force lessons to be private")
 
     args = parser.parse_args()
     

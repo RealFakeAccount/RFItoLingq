@@ -26,4 +26,4 @@ jobs:
           LINGQ_API_TOKEN: ${{ secrets.LINGQ_API_TOKEN }}
           LINGQ_COURSE_ID: ${{ vars.LINGQ_COURSE_ID }}
         run: |
-          python main.py sync --since 2026-01-01
+          python main.py sync --since 2026-01-01 --private
